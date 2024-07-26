@@ -9,7 +9,7 @@ if (isset($_GET['post_id']))
 else
 {
     // So we always have a post ID var defined
-    $postId = 1;
+    $postId = 0;
 }
 
 // Connect to the database, run a query, handle errors
@@ -36,6 +36,10 @@ if ($result === false)
 
 // Let's get a row
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Swap carriage returns for paragraph breaks
+$bodyText = htmlEscape($row['body']);
+$paraText = str_replace("\n", "</p><p>", $bodyText);
 ?>
 <!DOCTYPE html>
 <html>
@@ -53,10 +57,10 @@ $row = $stmt->fetch(PDO::FETCH_ASSOC);
             <?php echo htmlEscape($row['title']) ?>
         </h2>
         <div>
-            <?php echo $row['created_at'] ?>
+            <?php echo convertSqlDate($row['created_at']) ?>
         </div>
         <p>
-            <?php echo htmlEscape($row['body']) ?>
+            <?php echo $paraText ?>
         </p>
     </body>
 </html>
