@@ -120,11 +120,6 @@ if ($_SESSION)
         </style>
     </head>
     <body>
-        <?php
-            print_r($_SERVER); 
-            print_r($_SESSION);
-            print_r($_POST);
-             ?>
         <?php if ($attempted): ?>
 
             <?php if ($error): ?>
