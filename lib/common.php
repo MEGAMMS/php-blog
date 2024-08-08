@@ -51,17 +51,12 @@ function htmlEscape($html)
     return htmlspecialchars($html, ENT_HTML5, 'UTF-8');
 }
 
-/**
- * converts from 'Y-M-D' to 'D M Y' date format
- * 
- * @param string $sqlDate
- * @return string
- */
 function convertSqlDate($sqlDate)
 {
     /* @var $date DateTime */
-    $date = DateTime::createFromFormat('Y-m-d', $sqlDate);
-    return $date->format('d M Y');
+    $date = DateTime::createFromFormat('Y-m-d H:i:s', $sqlDate);
+
+    return $date->format('d M Y, H:i');
 }
 
 /**
@@ -74,22 +69,20 @@ function countCommentsForPost($postId)
 {
     $pdo = getPDO();
     $sql = "
-        SELECT 
+        SELECT
             COUNT(*) c
-        FROM 
+        FROM
             comment
         WHERE
             post_id = :post_id
     ";
     $stmt = $pdo->prepare($sql);
     $stmt->execute(
-        array("post_id" => $postId)
+        array('post_id' => $postId, )
     );
 
     return (int) $stmt->fetchColumn();
 }
-
-
 
 /**
  * Returns all the comments for the specified post
@@ -111,6 +104,6 @@ function getCommentsForPost($postId)
     $stmt->execute(
         array('post_id' => $postId, )
     );
+
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-
