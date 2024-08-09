@@ -21,7 +21,7 @@ function getDatabasePath()
 }
 
 /**
- * Gets the DSN (Data Source Name) for the SQLite connection
+ * Gets the DSN for the SQLite connection
  * 
  * @return string
  */
@@ -31,7 +31,7 @@ function getDsn()
 }
 
 /**
- * Gets the PDO (PHP Data Objects) object for database access
+ * Gets the PDO object for database access
  * 
  * @return \PDO
  */
@@ -57,6 +57,20 @@ function convertSqlDate($sqlDate)
     $date = DateTime::createFromFormat('Y-m-d H:i:s', $sqlDate);
 
     return $date->format('d M Y, H:i');
+}
+
+function redirectAndExit($script)
+{
+    // Get the domain-relative URL (e.g. /blog/whatever.php or /whatever.php) and work
+    // out the folder (e.g. /blog/ or /).
+    $relativeUrl = $_SERVER['PHP_SELF'];
+    $urlFolder = substr($relativeUrl, 0, strrpos($relativeUrl, '/') + 1);
+
+    // Redirect to the full URL (http://myhost/blog/script.php)
+    $host = $_SERVER['HTTP_HOST'];
+    $fullUrl = 'http://' . $host . $urlFolder . $script;
+    header('Location: ' . $fullUrl);
+    exit();
 }
 
 /**
@@ -86,7 +100,7 @@ function countCommentsForPost($postId)
 
 /**
  * Returns all the comments for the specified post
- *
+ * 
  * @param integer $postId
  */
 function getCommentsForPost($postId)
