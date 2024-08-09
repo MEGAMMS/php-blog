@@ -32,63 +32,66 @@ if ($_SESSION)
 ?>
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Blog installer</title>
-        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-        <style type="text/css">
-            .box {
-                border: 1px dotted silver;
-                border-radius: 5px;
-                padding: 4px;
-            }
-            .error {
-                background-color: #ff6666;
-            }
-            .success {
-                background-color: #88ff88;
-            }
-        </style>
-    </head>
-    <body>
-        <?php if ($attempted): ?>
 
-            <?php if ($error): ?>
-                <div class="error box">
-                    <?php echo $error ?>
-                </div>
-            <?php else: ?>
-                <div class="success box">
-                    The database and demo data was created OK.
+<head>
+    <title>Blog installer</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <style type="text/css">
+    .box {
+        border: 1px dotted silver;
+        border-radius: 5px;
+        padding: 4px;
+    }
 
-                    <?php foreach (array('post', 'comment') as $tableName): ?>
-                        <?php if (isset($count[$tableName])): ?>
-                            <?php // Prints the count ?>
-                            <?php echo $count[$tableName] ?> new
-                            <?php // Prints the name of the thing ?>
-                            <?php echo $tableName ?>s
-                            were created.
-                        <?php endif ?>
-                    <?php endforeach ?>
-                </div>
+    .error {
+        background-color: #ff6666;
+    }
 
-                <p>
-                    <a href="index.php">View the blog</a>,
-                    or <a href="install.php">install again</a>.
-                </p>
-            <?php endif ?>
+    .success {
+        background-color: #88ff88;
+    }
+    </style>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+</head>
 
-        <?php else: ?>
+<body>
+    <?php if ($attempted): ?>
 
-            <p>Click the install button to reset the database.</p>
+    <?php if ($error): ?>
+    <div class="error box">
+        <?php echo $error ?>
+    </div>
+    <?php else: ?>
+    <div class="success box">
+        The database and demo data was created OK.
 
-            <form method="post">
-                <input
-                    name="install"
-                    type="submit"
-                    value="Install"
-                />
-            </form>
-
+        <?php foreach (array('post', 'comment') as $tableName): ?>
+        <?php if (isset($count[$tableName])): ?>
+        <?php // Prints the count ?>
+        <?php echo $count[$tableName] ?> new
+        <?php // Prints the name of the thing ?>
+        <?php echo $tableName ?>s
+        were created.
         <?php endif ?>
-    </body>
+        <?php endforeach ?>
+    </div>
+
+    <p>
+        <a href="index.php">View the blog</a>,
+        or <a href="install.php">install again</a>.
+    </p>
+    <?php endif ?>
+
+    <?php else: ?>
+
+    <p>Click the install button to reset the database.</p>
+
+    <form method="post">
+        <input name="install" type="submit" value="Install" />
+    </form>
+
+    <?php endif ?>
+</body>
+
 </html>

@@ -1,4 +1,4 @@
 <a href="index.php">
-    <h1>Blog title</h1>
+    <h2>Blog title</h2>
 </a>
 <p>This paragraph summarises what the blog is about.</p>
