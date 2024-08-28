@@ -110,7 +110,7 @@ function countCommentsForPost($postId)
     ";
     $stmt = $pdo->prepare($sql);
     $stmt->execute(
-        array('post_id' => $postId, )
+        array('post_id' => $postId,)
     );
 
     return (int) $stmt->fetchColumn();
@@ -134,8 +134,63 @@ function getCommentsForPost($postId)
     ";
     $stmt = $pdo->prepare($sql);
     $stmt->execute(
-        array('post_id' => $postId, )
+        array('post_id' => $postId,)
     );
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function tryLogin(PDO $pdo, $username, $password)
+{
+    $error = '';
+
+    $sql = "
+    SELECT
+    password
+    FROM
+    user
+    WHERE
+    username = :username
+    ";
+
+    $stmt = $pdo->prepare($sql);
+    if ($stmt === false) {
+        $error = 'Could not prepare the user find';
+    }
+    if (!$error) {
+        $result = $stmt->execute(
+            array(
+                'username' => $username
+            )
+        );
+        if ($result === false) {
+            $error = 'Could not run the user creation';
+        }
+    }
+
+    if (!$error) {
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $hash = $row["password"];
+        if (!isset($hash)) $error = 'username not found';
+    }
+    if (!$error) {
+        if (!password_verify($password, $hash)) $error = 'wrong password';
+    }
+    return empty($error);
+}
+
+/**
+ * Logs the user in
+ * 
+ * For safety, we ask PHP to regenerate the cookie, so if a user logs onto a site that a cracker
+ * has prepared for him/her (e.g. on a public computer) the cracker's copy of the cookie ID will be
+ * useless.
+ * 
+ * @param string $username
+ */
+function login($username)
+{
+    session_regenerate_id();
+
+    $_SESSION['logged_in_username'] = $username;
 }
