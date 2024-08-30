@@ -37,7 +37,16 @@ function getDsn()
  */
 function getPDO()
 {
-    return new PDO(getDsn());
+    $pdo = new PDO(getDsn());
+
+    // Foreign key constraints need to be enabled manually in SQLite
+    $result = $pdo->query('PRAGMA foreign_keys = ON');
+    if ($result === false)
+    {
+        throw new Exception('Could not turn on foreign key constraints');
+    }
+
+    return $pdo;
 }
 
 /**
@@ -94,12 +103,12 @@ function redirectAndExit($script)
 /**
  * Returns the number of comments for the specified post
  * 
+ * @param PDO $pdo
  * @param integer $postId
  * @return integer
  */
-function countCommentsForPost($postId)
+function countCommentsForPost(PDO $pdo, $postId)
 {
-    $pdo = getPDO();
     $sql = "
         SELECT
             COUNT(*) c
@@ -110,7 +119,7 @@ function countCommentsForPost($postId)
     ";
     $stmt = $pdo->prepare($sql);
     $stmt->execute(
-        array('post_id' => $postId,)
+        array('post_id' => $postId, )
     );
 
     return (int) $stmt->fetchColumn();
@@ -119,11 +128,12 @@ function countCommentsForPost($postId)
 /**
  * Returns all the comments for the specified post
  * 
+ * @param PDO $pdo
  * @param integer $postId
+ * return array
  */
-function getCommentsForPost($postId)
+function getCommentsForPost(PDO $pdo, $postId)
 {
-    $pdo = getPDO();
     $sql = "
         SELECT
             id, name, text, created_at, website
@@ -134,7 +144,7 @@ function getCommentsForPost($postId)
     ";
     $stmt = $pdo->prepare($sql);
     $stmt->execute(
-        array('post_id' => $postId,)
+        array('post_id' => $postId, )
     );
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -142,41 +152,24 @@ function getCommentsForPost($postId)
 
 function tryLogin(PDO $pdo, $username, $password)
 {
-    $error = '';
-
     $sql = "
-    SELECT
-    password
-    FROM
-    user
-    WHERE
-    username = :username
+        SELECT
+            password
+        FROM
+            user
+        WHERE
+            username = :username
     ";
-
     $stmt = $pdo->prepare($sql);
-    if ($stmt === false) {
-        $error = 'Could not prepare the user find';
-    }
-    if (!$error) {
-        $result = $stmt->execute(
-            array(
-                'username' => $username
-            )
-        );
-        if ($result === false) {
-            $error = 'Could not run the user creation';
-        }
-    }
+    $stmt->execute(
+        array('username' => $username, )
+    );
 
-    if (!$error) {
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        $hash = $row["password"];
-        if (!isset($hash)) $error = 'username not found';
-    }
-    if (!$error) {
-        if (!password_verify($password, $hash)) $error = 'wrong password';
-    }
-    return empty($error);
+    // Get the hash from this row, and use the third-party hashing library to check it
+    $hash = $stmt->fetchColumn();
+    $success = password_verify($password, $hash);
+
+    return $success;
 }
 
 /**
@@ -195,7 +188,6 @@ function login($username)
     $_SESSION['logged_in_username'] = $username;
 }
 
-
 /**
  * Logs the user out
  */
@@ -203,14 +195,13 @@ function logout()
 {
     unset($_SESSION['logged_in_username']);
 }
+
 function getAuthUser()
 {
     return isLoggedIn() ? $_SESSION['logged_in_username'] : null;
 }
 
-
 function isLoggedIn()
 {
     return isset($_SESSION['logged_in_username']);
 }
-
